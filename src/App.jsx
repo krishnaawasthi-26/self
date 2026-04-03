@@ -1,7 +1,7 @@
 const portfolioData = {
   name: 'Krishna Awasthi',
   role: 'Backend & IoT Engineer',
-  tagline: 'Building real-time data systems with measurable performance gains.',
+  tagline: 'I design reliable backend systems and real-time IoT pipelines that are fast, observable, and production-ready.',
   location: 'India',
   email: 'krishna.awasthi.dev@gmail.com',
   links: {
@@ -12,77 +12,74 @@ const portfolioData = {
   heroProofs: [
     'Reduced API latency through async FastAPI optimization and smarter caching.',
     'Built MQTT pipelines handling 5,000+ IoT events per day with high delivery reliability.',
-    'Designed production-ready MongoDB/MySQL schemas for real-time ingestion workloads.'
+    'Designed MongoDB/MySQL schemas for real-time ingestion workloads and analytics.'
   ],
   projects: [
     {
       name: 'Smart Agriculture Management System',
       subtitle: 'FastAPI + MQTT + MongoDB',
-      impact: [
-        'Processed 5,000+ daily sensor events from distributed farm devices.',
-        'Delivered near real-time alerts and actuator control through MQTT topics.',
-        'Improved response latency using async endpoints and tuned database access.'
-      ],
       summary:
-        'Designed and shipped an IoT monitoring and control platform for irrigation and environmental tracking with resilient message ingestion.',
-      stack: ['Python', 'FastAPI', 'MQTT', 'MongoDB', 'Docker'],
-      cta: 'View case study'
+        'IoT monitoring and control platform for irrigation and environmental tracking with resilient message ingestion and near real-time alerts.',
+      stack: ['Python', 'FastAPI', 'MQTT', 'MongoDB', 'Docker']
     },
     {
       name: 'LeetCode Analytics Dashboard',
-      subtitle: 'Full-stack analytics experience',
-      impact: [
-        'Built insight views for topic-wise strengths and weak areas.',
-        'Implemented responsive dashboard cards for quick recruiter/interviewer scans.',
-        'Added SEO and loading optimizations to improve discoverability and speed.'
-      ],
+      subtitle: 'Data-driven full-stack app',
       summary:
-        'Created a dashboard that transforms coding history into actionable preparation insights and shareable progress snapshots.',
-      stack: ['React', 'Node.js', 'Charting', 'REST APIs'],
-      cta: 'View dashboard'
+        'Dashboard that transforms coding history into topic-level insights, progress trends, and interview preparation recommendations.',
+      stack: ['React', 'Node.js', 'REST APIs', 'Charts']
     },
     {
       name: 'URL Shortener Service',
-      subtitle: 'Backend microservice focus',
-      impact: [
-        'Built collision-safe slug generation and redirect handling workflows.',
-        'Introduced schema/index improvements for faster lookup under concurrency.',
-        'Documented API contracts for easier testing and integration.'
-      ],
+      subtitle: 'Backend microservice',
       summary:
-        'Implemented a clean URL shortener API emphasizing reliability, observability, and predictable performance under concurrent traffic.',
-      stack: ['FastAPI', 'Redis', 'MySQL', 'OpenAPI'],
-      cta: 'Read architecture notes'
+        'Collision-safe short link generation with reliable redirects, schema/index tuning, and clear API contracts for integration.',
+      stack: ['FastAPI', 'Redis', 'MySQL', 'OpenAPI']
     }
-  ],
-  writing: [
-    'Designing robust MQTT topic hierarchies for noisy IoT networks',
-    'FastAPI performance checklist: async I/O, caching, and p95 latency',
-    'MongoDB index strategy for event-ingestion systems'
   ]
 };
 
-function SectionTitle({ eyebrow, title, subtitle }) {
+const navItems = [
+  { label: 'Home', path: '/' },
+  { label: 'Projects', path: '/projects' },
+  { label: 'About', path: '/about' },
+  { label: 'Contact', path: '/contact' }
+];
+
+function SectionTitle({ title, subtitle }) {
   return (
     <header className="section-title">
-      {eyebrow && <p className="eyebrow">{eyebrow}</p>}
       <h2>{title}</h2>
-      {subtitle && <p className="muted">{subtitle}</p>}
+      {subtitle ? <p className="muted">{subtitle}</p> : null}
     </header>
   );
 }
 
-export default function App() {
+function Header({ pathname }) {
   return (
-    <main>
-      <a className="skip-link" href="#content">
-        Skip to content
-      </a>
+    <header className="topbar">
+      <div className="brand">{portfolioData.name}</div>
+      <nav aria-label="Main navigation">
+        <ul className="nav-list">
+          {navItems.map((item) => (
+            <li key={item.path}>
+              <a className={pathname === item.path ? 'active' : ''} href={item.path}>
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </header>
+  );
+}
 
-      <header className="hero card">
+function HomePage() {
+  return (
+    <>
+      <section className="hero card">
         <p className="eyebrow">Portfolio</p>
-        <h1>{portfolioData.name}</h1>
-        <p className="hero-role">{portfolioData.role}</p>
+        <h1>{portfolioData.role}</h1>
         <p className="hero-tagline">{portfolioData.tagline}</p>
 
         <ul className="proof-list">
@@ -92,82 +89,136 @@ export default function App() {
         </ul>
 
         <div className="cta-row" role="group" aria-label="Primary actions">
-          <a className="btn btn-primary" href="#projects">
+          <a className="btn btn-primary" href="/projects">
             View Projects
           </a>
           <a className="btn" href={portfolioData.links.cv}>
             Download CV
           </a>
         </div>
+      </section>
 
-        <p className="contact-inline">
-          <strong>Email:</strong>{' '}
-          <a href={`mailto:${portfolioData.email}`}>{portfolioData.email}</a>
-          <span aria-hidden="true"> · </span>
-          <strong>Location:</strong> {portfolioData.location}
+      <section className="card">
+        <SectionTitle
+          title="Quick Overview"
+          subtitle="Backend engineering, IoT systems, and performance-focused development."
+        />
+        <div className="stats-grid">
+          <article>
+            <h3>5,000+</h3>
+            <p className="muted">IoT events processed daily</p>
+          </article>
+          <article>
+            <h3>Async-first</h3>
+            <p className="muted">FastAPI architecture and API optimization</p>
+          </article>
+          <article>
+            <h3>Production Ready</h3>
+            <p className="muted">Structured schemas, reliability, and observability</p>
+          </article>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function ProjectsPage() {
+  return (
+    <section className="card">
+      <SectionTitle
+        title="Selected Projects"
+        subtitle="Case-study style projects focused on measurable engineering impact."
+      />
+
+      <div className="project-grid">
+        {portfolioData.projects.map((project) => (
+          <article key={project.name} className="project-card">
+            <p className="project-subtitle">{project.subtitle}</p>
+            <h3>{project.name}</h3>
+            <p className="project-summary">{project.summary}</p>
+            <p className="stack">
+              <strong>Stack:</strong> {project.stack.join(' · ')}
+            </p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function AboutPage() {
+  return (
+    <section className="card two-col">
+      <article>
+        <SectionTitle
+          title="About Me"
+          subtitle="I build backend systems that stay reliable under real-world load."
+        />
+        <p>
+          I am a backend and IoT-focused engineer who enjoys building systems that collect, process, and expose
+          real-time data with clear performance goals.
         </p>
-      </header>
+      </article>
+      <article>
+        <SectionTitle
+          title="Target Roles"
+          subtitle="Roles where I can contribute quickly and meaningfully."
+        />
+        <ul>
+          <li>Backend / Platform Engineering Intern</li>
+          <li>IoT & Real-time Data Engineering Intern</li>
+          <li>Full-stack Engineering Intern (backend-heavy)</li>
+        </ul>
+      </article>
+    </section>
+  );
+}
 
-      <div id="content" className="container">
-        <section id="projects" className="card">
-          <SectionTitle
-            eyebrow="Selected Work"
-            title="Case-study style projects"
-            subtitle="Each project highlights problem framing, technical decisions, and measurable outcomes."
-          />
+function ContactPage() {
+  return (
+    <section className="card contact-card">
+      <SectionTitle title="Contact" subtitle="Let’s connect for internships, projects, or collaboration." />
+      <p>
+        <strong>Email:</strong> <a href={`mailto:${portfolioData.email}`}>{portfolioData.email}</a>
+      </p>
+      <p>
+        <strong>GitHub:</strong> <a href={portfolioData.links.github}>{portfolioData.links.github}</a>
+      </p>
+      <p>
+        <strong>LinkedIn:</strong> <a href={portfolioData.links.linkedin}>{portfolioData.links.linkedin}</a>
+      </p>
+      <p>
+        <strong>Location:</strong> {portfolioData.location}
+      </p>
+    </section>
+  );
+}
 
-          <div className="project-grid">
-            {portfolioData.projects.map((project) => (
-              <article key={project.name} className="project-card">
-                <p className="project-subtitle">{project.subtitle}</p>
-                <h3>{project.name}</h3>
-                <p className="project-summary">{project.summary}</p>
+function NotFoundPage() {
+  return (
+    <section className="card">
+      <h2>Page not found</h2>
+      <p className="muted">Use the top navigation to visit available pages.</p>
+    </section>
+  );
+}
 
-                <ul className="impact-list">
-                  {project.impact.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
+function getPage(pathname) {
+  if (pathname === '/') return <HomePage />;
+  if (pathname === '/projects') return <ProjectsPage />;
+  if (pathname === '/about') return <AboutPage />;
+  if (pathname === '/contact') return <ContactPage />;
+  return <NotFoundPage />;
+}
 
-                <p className="stack">
-                  <strong>Stack:</strong> {project.stack.join(' · ')}
-                </p>
+export default function App() {
+  const pathname = window.location.pathname;
 
-                <button className="text-link" type="button" aria-label={`${project.cta} for ${project.name}`}>
-                  {project.cta} →
-                </button>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="card two-col">
-          <article>
-            <SectionTitle
-              eyebrow="Target Roles"
-              title="What I am optimized for"
-              subtitle="A focused narrative: backend systems + real-time IoT + performance tuning."
-            />
-            <ul>
-              <li>Backend / Platform Engineering Intern</li>
-              <li>IoT & Real-time Data Engineering Intern</li>
-              <li>Full-stack Engineering Intern (backend-heavy)</li>
-            </ul>
-          </article>
-
-          <article>
-            <SectionTitle
-              eyebrow="Writing"
-              title="Engineering Notes"
-              subtitle="Communication proof through short technical write-ups."
-            />
-            <ul>
-              {portfolioData.writing.map((post) => (
-                <li key={post}>{post}</li>
-              ))}
-            </ul>
-          </article>
-        </section>
+  return (
+    <main>
+      <div className="container">
+        <Header pathname={pathname} />
+        {getPage(pathname)}
       </div>
     </main>
   );
