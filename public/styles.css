@@ -156,3 +156,31 @@ textarea {
     height: 220px;
   }
 }
+
+.item-card {
+  padding: 0.7rem;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  margin-bottom: 0.7rem;
+}
+
+.login-card {
+  max-width: 520px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: linear-gradient(180deg, #0f172a, #111827);
+}
+
+.login-btn {
+  width: 100%;
+  margin-top: 0.6rem;
+}
+
+.muted {
+  color: #cbd5e1;
+}
+
+.error {
+  color: #fda4af;
+  font-weight: 700;
+}
