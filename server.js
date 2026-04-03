@@ -1,69 +1,29 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const fs = require('fs/promises');
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
+const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/krishna_portfolio';
 const JWT_SECRET = process.env.JWT_SECRET || 'replace-this-in-production';
+const DATA_DIR = path.join(__dirname, 'data');
+const DATA_FILE = path.join(DATA_DIR, 'portfolio.json');
+const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
 
-app.use(express.json({ limit: '2mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
-
-const portfolioSchema = new mongoose.Schema(
-  {
-    name: String,
-    title: String,
-    location: String,
-    email: String,
-    phone: String,
-    resumeUrl: String,
-    links: [
-      {
-        label: String,
-        url: String,
-      },
-    ],
-    about: String,
-    skills: [String],
-    achievements: [String],
-    experiences: [
-      {
-        company: String,
-        role: String,
-        duration: String,
-        points: [String],
-      },
-    ],
-    projects: [
-      {
-        name: String,
-        stack: String,
-        description: String,
-        github: String,
-        demo: String,
-      },
-    ],
-    certificates: [
-      {
-        name: String,
-        issuer: String,
-        url: String,
-      },
-    ],
-    photos: [
-      {
-        url: String,
-        caption: String,
-      },
-    ],
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname) || '.jpg';
+    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
   },
-  { timestamps: true }
-);
+});
 
-const Portfolio = mongoose.model('Portfolio', portfolioSchema);
+const upload = multer({ storage });
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 const defaultPortfolio = {
   name: 'Krishna Awasthi',
@@ -145,12 +105,25 @@ const defaultPortfolio = {
   ],
 };
 
-async function getOrCreatePortfolio() {
-  let portfolio = await Portfolio.findOne();
-  if (!portfolio) {
-    portfolio = await Portfolio.create(defaultPortfolio);
+async function ensureStorage() {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  await fs.mkdir(UPLOAD_DIR, { recursive: true });
+
+  try {
+    await fs.access(DATA_FILE);
+  } catch {
+    await fs.writeFile(DATA_FILE, JSON.stringify(defaultPortfolio, null, 2));
   }
-  return portfolio;
+}
+
+async function getPortfolio() {
+  const raw = await fs.readFile(DATA_FILE, 'utf-8');
+  return JSON.parse(raw);
+}
+
+async function savePortfolio(payload) {
+  await fs.writeFile(DATA_FILE, JSON.stringify(payload, null, 2));
+  return payload;
 }
 
 function auth(req, res, next) {
@@ -172,34 +145,36 @@ function auth(req, res, next) {
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
 
-  if (username !== 'me' || password !== '123') {
+  if (username !== 'admin' || password !== '123') {
     return res.status(401).json({ message: 'Invalid username/password' });
   }
 
-  const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '8h' });
+  const token = jwt.sign({ username, role: 'admin' }, JWT_SECRET, { expiresIn: '8h' });
   res.json({ token });
 });
 
-app.get('/api/portfolio', async (req, res) => {
-  const portfolio = await getOrCreatePortfolio();
+app.get('/api/portfolio', async (_req, res) => {
+  const portfolio = await getPortfolio();
   res.json(portfolio);
 });
 
 app.put('/api/portfolio', auth, async (req, res) => {
-  const existing = await getOrCreatePortfolio();
-
-  const update = {
-    ...req.body,
-    _id: existing._id,
-  };
-
-  const saved = await Portfolio.findByIdAndUpdate(existing._id, update, {
-    new: true,
-    runValidators: true,
-    overwrite: true,
-  });
-
+  const saved = await savePortfolio(req.body);
   res.json(saved);
+});
+
+app.post('/api/upload', auth, upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No image uploaded' });
+  }
+
+  res.json({
+    url: `/uploads/${req.file.filename}`,
+  });
+});
+
+app.get('/login', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 app.get('/admin', (_req, res) => {
@@ -211,17 +186,11 @@ app.get('*', (_req, res) => {
 });
 
 async function start() {
-  try {
-    await mongoose.connect(MONGO_URI);
-    console.log(`Connected to MongoDB: ${MONGO_URI}`);
-    app.listen(PORT, () => {
-      console.log(`Portfolio app running on http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error('Failed to start server. Make sure MongoDB is running locally.');
-    console.error(error.message);
-    process.exit(1);
-  }
+  await ensureStorage();
+  app.listen(PORT, () => {
+    console.log(`Portfolio app running on http://localhost:${PORT}`);
+    console.log('Using local JSON storage (MongoDB not required).');
+  });
 }
 
 start();

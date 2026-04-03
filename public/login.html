@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio Login</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <section class="card" id="loginCard">
+        <h1>Admin Login</h1>
+        <p>Use username <code>admin</code> and password <code>123</code>.</p>
+        <form id="loginForm">
+          <label>Username <input name="username" required /></label>
+          <label>Password <input type="password" name="password" required /></label>
+          <button class="btn" type="submit">Login</button>
+        </form>
+        <p id="loginMessage"></p>
+      </section>
+    </main>
+
+    <script src="/login.js"></script>
+  </body>
+</html>

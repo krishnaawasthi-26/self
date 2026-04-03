@@ -26,11 +26,31 @@ function createEditorItem(fields, onRemove) {
   return wrapper;
 }
 
+async function uploadPhoto(file) {
+  const token = localStorage.getItem(tokenKey);
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const res = await fetch('/api/upload', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    throw new Error('Upload failed');
+  }
+
+  return res.json();
+}
+
 function syncFromQuickEditors() {
   const readGroup = (containerId) =>
     Array.from($(containerId).querySelectorAll('.editor-item')).map((item) => {
       const obj = {};
-      item.querySelectorAll('input').forEach((inp) => {
+      item.querySelectorAll('input[data-key]').forEach((inp) => {
         obj[inp.dataset.key] = inp.value;
       });
       return obj;
@@ -40,6 +60,70 @@ function syncFromQuickEditors() {
   currentData.certificates = readGroup('certEditor');
   currentData.links = readGroup('linksEditor');
   $('jsonEditor').value = JSON.stringify(currentData, null, 2);
+}
+
+function renderPhotoEditors() {
+  const root = $('photosEditor');
+  root.innerHTML = '';
+
+  currentData.photos.forEach((entry, index) => {
+    const item = document.createElement('div');
+    item.className = 'editor-item';
+
+    const urlInput = document.createElement('input');
+    urlInput.placeholder = 'Photo URL';
+    urlInput.value = entry.url || '';
+    urlInput.dataset.key = 'url';
+
+    const captionInput = document.createElement('input');
+    captionInput.placeholder = 'Caption';
+    captionInput.value = entry.caption || '';
+    captionInput.dataset.key = 'caption';
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+
+    const uploadBtn = document.createElement('button');
+    uploadBtn.className = 'btn secondary';
+    uploadBtn.textContent = 'Upload from storage';
+    uploadBtn.addEventListener('click', async () => {
+      const file = fileInput.files?.[0];
+      if (!file) {
+        $('saveMessage').textContent = 'Choose an image first';
+        return;
+      }
+
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = 'Uploading...';
+      try {
+        const data = await uploadPhoto(file);
+        urlInput.value = data.url;
+        syncFromQuickEditors();
+        $('saveMessage').textContent = 'Image uploaded locally';
+      } catch {
+        $('saveMessage').textContent = 'Image upload failed';
+      } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = 'Upload from storage';
+      }
+    });
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'btn secondary';
+    removeBtn.textContent = 'Remove';
+    removeBtn.addEventListener('click', () => {
+      currentData.photos.splice(index, 1);
+      renderQuickEditors();
+      syncFromQuickEditors();
+    });
+
+    urlInput.addEventListener('input', syncFromQuickEditors);
+    captionInput.addEventListener('input', syncFromQuickEditors);
+
+    item.append(urlInput, captionInput, fileInput, uploadBtn, removeBtn);
+    root.appendChild(item);
+  });
 }
 
 function renderQuickEditors() {
@@ -60,10 +144,7 @@ function renderQuickEditors() {
     });
   };
 
-  mount('photosEditor', currentData.photos, [
-    { key: 'url', placeholder: 'Photo URL' },
-    { key: 'caption', placeholder: 'Caption' },
-  ]);
+  renderPhotoEditors();
 
   mount('certEditor', currentData.certificates, [
     { key: 'name', placeholder: 'Certificate name' },
@@ -83,30 +164,6 @@ async function loadData() {
   $('jsonEditor').value = JSON.stringify(currentData, null, 2);
   renderQuickEditors();
 }
-
-$('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const form = new FormData(e.target);
-  const username = form.get('username');
-  const password = form.get('password');
-
-  const res = await fetch('/api/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password }),
-  });
-
-  if (!res.ok) {
-    $('loginMessage').textContent = 'Login failed';
-    return;
-  }
-
-  const data = await res.json();
-  localStorage.setItem(tokenKey, data.token);
-  $('loginCard').classList.add('hidden');
-  $('editorCard').classList.remove('hidden');
-  loadData();
-});
 
 $('addPhoto').addEventListener('click', () => {
   currentData.photos.push({ url: '', caption: '' });
@@ -129,6 +186,9 @@ $('addLink').addEventListener('click', () => {
 $('jsonEditor').addEventListener('input', () => {
   try {
     currentData = JSON.parse($('jsonEditor').value);
+    currentData.photos = currentData.photos || [];
+    currentData.certificates = currentData.certificates || [];
+    currentData.links = currentData.links || [];
     renderQuickEditors();
     $('saveMessage').textContent = '';
   } catch {
@@ -159,12 +219,12 @@ $('saveBtn').addEventListener('click', async () => {
     return;
   }
 
-  $('saveMessage').textContent = 'Saved successfully';
+  $('saveMessage').textContent = 'Saved successfully (local)';
 });
 
 const existingToken = localStorage.getItem(tokenKey);
-if (existingToken) {
-  $('loginCard').classList.add('hidden');
-  $('editorCard').classList.remove('hidden');
+if (!existingToken) {
+  window.location.href = '/login';
+} else {
   loadData();
 }
