@@ -1,0 +1,7 @@
+{
+  "name": "portfolio-v3-express-json",
+  "private": true,
+  "main": "server.js",
+  "scripts": {"start": "node server.js"},
+  "dependencies": {"express": "^4.19.2"}
+}
