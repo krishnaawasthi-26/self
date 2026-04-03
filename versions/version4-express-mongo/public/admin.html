@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio Admin</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <section class="card" id="loginCard">
+        <h1>Admin Login</h1>
+        <p>Use username <code>me</code> and password <code>123</code>.</p>
+        <form id="loginForm">
+          <label>Username <input name="username" required /></label>
+          <label>Password <input type="password" name="password" required /></label>
+          <button class="btn" type="submit">Login</button>
+        </form>
+        <p id="loginMessage"></p>
+      </section>
+
+      <section class="card hidden" id="editorCard">
+        <div class="row-between">
+          <h1>Edit Portfolio Content</h1>
+          <a href="/" class="btn secondary">View Site</a>
+        </div>
+
+        <p>
+          Edit all website content below. You can add/remove links, photos, certificates, projects, and any
+          details. Press save to update live content.
+        </p>
+
+        <h2>Quick Lists</h2>
+        <div class="grid-2">
+          <div>
+            <h3>Photos</h3>
+            <div id="photosEditor"></div>
+            <button class="btn secondary" id="addPhoto">+ Add Photo</button>
+          </div>
+          <div>
+            <h3>Certificates</h3>
+            <div id="certEditor"></div>
+            <button class="btn secondary" id="addCert">+ Add Certificate</button>
+          </div>
+          <div>
+            <h3>Profile Links</h3>
+            <div id="linksEditor"></div>
+            <button class="btn secondary" id="addLink">+ Add Link</button>
+          </div>
+        </div>
+
+        <h2>Full Content JSON</h2>
+        <p>Advanced mode: directly edit complete portfolio content.</p>
+        <textarea id="jsonEditor" rows="20"></textarea>
+
+        <div class="row">
+          <button class="btn" id="saveBtn">Save Changes</button>
+          <span id="saveMessage"></span>
+        </div>
+      </section>
+    </main>
+
+    <script src="/admin.js"></script>
+  </body>
+</html>
