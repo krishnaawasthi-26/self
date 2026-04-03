@@ -1,6 +1,0 @@
-<!doctype html><html><body><h1>Admin V3</h1><input id='u' placeholder='username'><input id='p' type='password' placeholder='password'><button id='l'>Login</button><textarea id='t' rows='15' style='width:100%'></textarea><button id='s'>Save</button>
-<script>
-let ok=false;fetch('/api/portfolio').then(r=>r.json()).then(d=>t.value=JSON.stringify(d,null,2));
-l.onclick=()=>{ok=(u.value==='me'&&p.value==='123');alert(ok?'ok':'invalid')};
-s.onclick=()=>{if(!ok)return alert('login first');fetch('/api/portfolio',{method:'PUT',headers:{'content-type':'application/json','x-admin':'me-123'},body:t.value}).then(()=>alert('saved'))}
-</script></body></html>
