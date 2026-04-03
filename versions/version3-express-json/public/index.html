@@ -1,5 +1,0 @@
-<!doctype html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1'><title>Version 3</title></head><body>
-<h1 id='name'></h1><p id='title'></p><a href='admin.html'>Admin</a><div id='content'></div>
-<script>
-fetch('/api/portfolio').then(r=>r.json()).then(d=>{name.textContent=d.name;title.textContent=d.title;content.innerHTML='<pre>'+JSON.stringify(d,null,2)+'</pre>'})
-</script></body></html>
