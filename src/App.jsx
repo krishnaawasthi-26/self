@@ -7,9 +7,19 @@ function LandingPage() {
         This is a temporary first page while the full project is being prepared. Use the admin login if you need
         management access.
       </p>
+
+      <ul className="feature-list" aria-label="What is already available">
+        <li>Refreshed color palette with better contrast</li>
+        <li>Cleaner typography and spacing for readability</li>
+        <li>Improved call-to-action button styling</li>
+      </ul>
+
       <div className="cta-row">
         <a className="btn btn-primary" href="/login">
           Go to Admin Login
+        </a>
+        <a className="btn btn-ghost" href="#status">
+          View Status
         </a>
       </div>
     </section>
@@ -21,7 +31,9 @@ function LoginPage() {
     <section className="card login-card">
       <p className="eyebrow">Admin Access</p>
       <h1>Login</h1>
-      <p className="muted">Use this page at <strong>/login</strong> for admin authentication.</p>
+      <p className="muted">
+        Use this page at <strong>/login</strong> for admin authentication.
+      </p>
 
       <form className="login-form" onSubmit={(event) => event.preventDefault()}>
         <label htmlFor="admin-email">Email</label>
@@ -30,7 +42,9 @@ function LoginPage() {
         <label htmlFor="admin-password">Password</label>
         <input id="admin-password" type="password" placeholder="••••••••" required />
 
-        <button type="submit" className="btn btn-primary">Sign In</button>
+        <button type="submit" className="btn btn-primary">
+          Sign In
+        </button>
       </form>
 
       <a className="back-link" href="/">
