@@ -1,88 +1,84 @@
-function LandingPage() {
+import { useEffect, useState } from 'react';
+
+const NAV_ITEMS = ['Dashboard', 'Lessons', 'Assignments', 'Reports', 'Settings'];
+
+function Sidebar({ isOpen, isDesktop, onToggle }) {
   return (
-    <section className="card hero-card">
-      <p className="eyebrow">Temporary Template</p>
-      <h1>Website is under construction</h1>
-      <p className="muted">
-        This is a temporary first page while the full project is being prepared. Use the admin login if you need
-        management access.
-      </p>
-
-      <ul className="feature-list" aria-label="What is already available">
-        <li>Refreshed color palette with better contrast</li>
-        <li>Cleaner typography and spacing for readability</li>
-        <li>Improved call-to-action button styling</li>
-      </ul>
-
-      <div className="cta-row">
-        <a className="btn btn-primary" href="/login">
-          Go to Admin Login
-        </a>
-        <a className="btn btn-ghost" href="#status">
-          View Status
-        </a>
-      </div>
-    </section>
-  );
-}
-
-function LoginPage() {
-  return (
-    <section className="card login-card">
-      <p className="eyebrow">Admin Access</p>
-      <h1>Login</h1>
-      <p className="muted">
-        Use this page at <strong>/login</strong> for admin authentication.
-      </p>
-
-      <form className="login-form" onSubmit={(event) => event.preventDefault()}>
-        <label htmlFor="admin-email">Email</label>
-        <input id="admin-email" type="email" placeholder="admin@example.com" required />
-
-        <label htmlFor="admin-password">Password</label>
-        <input id="admin-password" type="password" placeholder="••••••••" required />
-
-        <button type="submit" className="btn btn-primary">
-          Sign In
+    <aside className={`sidebar ${isOpen ? 'is-open' : ''} ${isDesktop ? 'is-desktop' : 'is-mobile'}`}>
+      <div className="sidebar-header">
+        <button
+          type="button"
+          className="sidebar-toggle"
+          onClick={onToggle}
+          aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          aria-expanded={isOpen}
+        >
+          ☰
         </button>
-      </form>
-
-      <a className="back-link" href="/">
-        ← Back to temporary home page
-      </a>
-    </section>
-  );
-}
-
-function NotFoundPage() {
-  return (
-    <section className="card">
-      <h2>Page not found</h2>
-      <p className="muted">Try the temporary home page or admin login page.</p>
-      <div className="cta-row">
-        <a className="btn" href="/">
-          Home
-        </a>
-        <a className="btn" href="/login">
-          Login
-        </a>
+        <span className="book-icon" aria-hidden="true">
+          📘
+        </span>
       </div>
-    </section>
+
+      <nav className="sidebar-nav" aria-label="Main navigation">
+        {NAV_ITEMS.map((item) => (
+          <button key={item} type="button" className="nav-item">
+            {item}
+          </button>
+        ))}
+      </nav>
+    </aside>
   );
 }
 
-function getPage(pathname) {
-  if (pathname === '/') return <LandingPage />;
-  if (pathname === '/login') return <LoginPage />;
-  return <NotFoundPage />;
+function ContentCard({ title, text }) {
+  return (
+    <article className="content-card">
+      <h2>{title}</h2>
+      <p>{text}</p>
+    </article>
+  );
 }
 
 export default function App() {
-  const pathname = window.location.pathname;
+  const [isDesktop, setIsDesktop] = useState(() => window.matchMedia('(min-width: 992px)').matches);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.matchMedia('(min-width: 992px)').matches);
+
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 992px)');
+
+    const syncLayout = (event) => {
+      setIsDesktop(event.matches);
+      setIsSidebarOpen(event.matches);
+    };
+
+    media.addEventListener('change', syncLayout);
+    return () => media.removeEventListener('change', syncLayout);
+  }, []);
+
+  const toggleSidebar = () => setIsSidebarOpen((current) => !current);
 
   return (
-    <main>
-      <div className="container">{getPage(pathname)}</div>
+    <main className="app-shell">
+      <Sidebar isOpen={isSidebarOpen} isDesktop={isDesktop} onToggle={toggleSidebar} />
+
+      {!isDesktop && isSidebarOpen ? <button type="button" className="overlay" onClick={toggleSidebar} aria-label="Close sidebar" /> : null}
+
+      <section className={`main-content ${isDesktop ? (isSidebarOpen ? 'sidebar-open' : 'sidebar-closed') : ''}`}>
+        <header className="content-header">
+          <h1>Responsive Learning Panel</h1>
+          <p>
+            Mobile keeps the overlay style. On desktop, the sidebar now slides while content shrinks and shifts so both
+            areas stay visible.
+          </p>
+        </header>
+
+        <div className="content-grid">
+          <ContentCard title="Overview" text="Track progress, assignments, and upcoming lessons from one place." />
+          <ContentCard title="Recent Activity" text="View class updates, recent submissions, and teacher feedback." />
+          <ContentCard title="Quick Actions" text="Create notes, schedule sessions, or review pending tasks." />
+        </div>
+      </section>
     </main>
   );
 }
